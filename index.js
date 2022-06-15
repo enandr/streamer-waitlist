@@ -1,6 +1,6 @@
 //const http = require('http').createServer();
 
-const io = require('socket.io')(42630, {
+const io = require('socket.io')(4444, {
     cors: { origin: "*" }
 });
 const waitingList = [];
