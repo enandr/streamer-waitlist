@@ -1,7 +1,13 @@
-const http = require('http').createServer();
+//const http = require('http').createServer();
 
-const io = require('socket.io')(http, {
+/*const io = require('socket.io')(http, {
     cors: { origin: "*" ,methods: ["GET", "POST"]}
+});*/
+const io = require("socket.io")(process.env.PORT || 42630,{
+    cors: {
+        origin: "*",
+        methods: ["GET", "POST"]
+    }
 });
 const waitingList = [];
 let adminId = '';
@@ -79,4 +85,4 @@ io.on('connection', (socket) => {
     });
 });
 
-http.listen(process.env.PORT || 42630, () => console.log('listening') );
+//http.listen(process.env.PORT || 42630, () => console.log('listening') );
