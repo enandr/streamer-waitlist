@@ -1,6 +1,6 @@
-const http = require('http').createServer();
+//const http = require('http').createServer();
 
-const io = require('socket.io')(http, {
+const io = require('socket.io')(42630, {
     cors: { origin: "*" }
 });
 const waitingList = [];
@@ -79,4 +79,4 @@ io.on('connection', (socket) => {
     });
 });
 
-http.listen(42630, () => console.log('listening on http://localhost:42630') );
+//http.listen(42630, () => console.log('listening on http://localhost:42630') );
