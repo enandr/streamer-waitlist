@@ -1,5 +1,5 @@
 const http = require('http').createServer();
-å
+
 const io = require('socket.io')(http, {
     cors: { origin: "*" ,methods: ["GET", "POST"]}
 });
