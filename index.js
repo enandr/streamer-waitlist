@@ -1,7 +1,7 @@
 //const http = require('http').createServer();
 
 const io = require('socket.io')(4444, {
-    cors: { origin: "*" }
+    cors: { origin: "*" ,methods: ["GET", "POST"]}
 });
 const waitingList = [];
 let adminId = '';
