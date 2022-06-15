@@ -79,4 +79,4 @@ io.on('connection', (socket) => {
     });
 });
 
-http.listen(42630, () => console.log('listening on http://localhost:42630') );
+http.listen(process.env.PORT || 42630, () => console.log('listening') );
