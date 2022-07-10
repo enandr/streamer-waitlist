@@ -3,6 +3,7 @@
 /*const io = require('socket.io')(http, {
     cors: { origin: "*" ,methods: ["GET", "POST"]}
 });*/
+const randomWords = require('random-words');
 const io = require("socket.io")(process.env.PORT || 42630,{
     cors: {
         origin: "*",
@@ -10,12 +11,27 @@ const io = require("socket.io")(process.env.PORT || 42630,{
     }
 });
 const waitingList = [];
+let roomList = [];
 let adminId = '';
 let clients;
 const sendWaitingListSize = () => {
     clients = io.sockets.adapter.rooms.get('waiting');
     clients !== undefined ? io.to(adminId).emit('waitingCount',clients.size) : io.to(adminId).emit('waitingCount', 0);
 }
+
+setInterval(() => {
+    const allRooms = io.sockets.adapter.rooms;
+    const newRoomList = [];
+    allRooms.forEach((val,key) => {
+        if (key.includes('room-')) {
+            newRoomList.push(key.split('room-')[1]);
+            //console.log(allRooms.get(key).size);
+        }
+        //key.includes('room-') && newRoomList.push(key.split('room-')[1])
+    })
+    roomList = newRoomList;
+    io.to('waiting').emit('roomList',roomList)
+},1000)
 
 io.on('connection', (socket) => {
     const id = socket.id;
@@ -27,27 +43,24 @@ io.on('connection', (socket) => {
     }
     setInterval(() => {
         socket.emit('keepAlive',true)
-    },10000)
-    /*setTimeout(() => {
-        io.to(id).emit('hasBeenChosen',true);
+    },1000)
+    socket.on('createRoom',() => {
+        const roomCode = randomWords({ exactly: 3, join: '-' });
+        io.to(id).emit('roomCode',roomCode);
+        socket.join(`room-${roomCode}`);
+    })
+    socket.on('joinNewRoom',(data) => {
+        console.log(data)
         socket.leave('waiting');
-        socket.join('players');
-        socket.emit('hostHasChosen', true)
-    },2000)*/
+        socket.join(`room-${data}`)
+    })
     socket.on('isAdmin', () => {
-        if (adminId === '') {
             socket.leave('waiting');
-            adminId = id;
             const index = waitingList.indexOf(adminId)
             if (index) {
                 waitingList.splice(index)
             }
-            io.to(adminId).emit('youAreAdmin',true)
             sendWaitingListSize();
-        }
-        else {
-            io.to(id).emit('youAreAdmin',false)
-        }
     });
     socket.on('adminControl', (data) => {
         if (id !== adminId) {
@@ -76,6 +89,7 @@ io.on('connection', (socket) => {
         }
         if (id === adminId) {
             adminId = '';
+
         }
         socket.leave('players')
         socket.leave('waiting')
