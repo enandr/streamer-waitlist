@@ -14,6 +14,7 @@ const waitingList = [];
 let roomList = [];
 let adminId = '';
 let clients;
+const roomPrefix = 'game-room-'
 const sendWaitingListSize = () => {
     clients = io.sockets.adapter.rooms.get('waiting');
     clients !== undefined ? io.to(adminId).emit('waitingCount',clients.size) : io.to(adminId).emit('waitingCount', 0);
@@ -23,12 +24,13 @@ setInterval(() => {
     const allRooms = io.sockets.adapter.rooms;
     const newRoomList = [];
     allRooms.forEach((val,key) => {
-        if (key.includes('room-')) {
-            newRoomList.push({roomName: key.split('room-')[1], waitingSize:allRooms.get(key).size});
+        if (key.includes(roomPrefix)) {
+            newRoomList.push({roomName: key.split(roomPrefix)[1], waitingSize:allRooms.get(key).size});
         }
     })
     roomList = newRoomList;
-    io.to('waiting').emit('roomList',roomList)
+    io.to('waiting').emit('roomList',roomList);
+    io.to('admins').emit('keepAlive');
 },1000)
 
 io.on('connection', (socket) => {
@@ -39,13 +41,11 @@ io.on('connection', (socket) => {
     if (adminId) {
         sendWaitingListSize();
     }
-    setInterval(() => {
-        socket.emit('keepAlive',true)
-    },1000)
     socket.on('createRoom',() => {
         const roomCode = randomWords({ exactly: 3, join: '-' });
         io.to(id).emit('roomCode',roomCode);
-        socket.join(`room-${roomCode}`);
+        socket.join(`${roomPrefix}${roomCode}`);
+        socket.join(`admins`);
     })
     socket.on('joinNewRoom',(data) => {
         console.log(data)
