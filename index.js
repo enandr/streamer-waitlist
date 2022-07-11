@@ -24,10 +24,8 @@ setInterval(() => {
     const newRoomList = [];
     allRooms.forEach((val,key) => {
         if (key.includes('room-')) {
-            newRoomList.push(key.split('room-')[1]);
-            //console.log(allRooms.get(key).size);
+            newRoomList.push({roomName: key.split('room-')[1], waitingSize:allRooms.get(key).size});
         }
-        //key.includes('room-') && newRoomList.push(key.split('room-')[1])
     })
     roomList = newRoomList;
     io.to('waiting').emit('roomList',roomList)
