@@ -49,27 +49,15 @@ io.on('connection', (socket) => {
     socket.on('createRoom',() => {
         const roomCode = randomWords({ exactly: 3, join: '-' });
         io.to(id).emit('roomCode',roomCode);
-        console.log(myRoomList);
         leaveARoom('waiting');
-        console.log(myRoomList);
         joinARoom(`${roomPrefix}${roomCode}`)
         joinARoom('admins')
-        console.log(myRoomList);
     })
 
     socket.on('joinNewRoom',(data) => {
-        socket.leave('waiting');
-        socket.join(`${roomPrefix}${data}`)
+        leaveARoom('waiting');
+        joinARoom(`${roomPrefix}${data}`)
     })
-
-    /*socket.on('isAdmin', () => {
-            socket.leave('waiting');
-            const index = waitingList.indexOf(adminId)
-            if (index) {
-                waitingList.splice(index)
-            }
-            sendWaitingListSize();
-    });*/
 
     socket.on('adminControl', (data) => {
         socket.to('players').emit('roomCode',data)
@@ -93,8 +81,7 @@ io.on('connection', (socket) => {
         if (index) {
             waitingList.splice(index)
         }
-        socket.leave('players')
-        socket.leave('waiting')
+        myRoomList.forEach((room) => leaveARoom(room))
     });
 });
 
